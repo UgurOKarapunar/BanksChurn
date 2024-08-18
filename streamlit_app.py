@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Load the trained model
-pipeline = joblib.load('gradient_boosting_model5.pkl')
+pipeline = joblib.load('model_pipeline.pkl')
 
 # Function to make predictions
 def predict(input_data):
@@ -21,9 +21,13 @@ tenure = st.number_input('Tenure', min_value=0, max_value=10, value=2)
 estimated_salary = st.number_input('Estimated Salary', min_value=0, max_value=200000, value=2000)
 num_of_products = st.number_input('Number of Products', min_value=1, max_value=4, value=2)
 credit_score = st.number_input('Credit Score', min_value=300, max_value=850, value=650)
-has_cr_card = st.selectbox('Has Credit Card', [0, 1])
-is_active_member = st.selectbox('Is Active Member', [0, 1])
+has_cr_card = st.selectbox('Has Credit Card', ['Yes', 'No'])
+is_active_member = st.selectbox('Is Active Member', ['Yes', 'No'])
 balance = st.number_input('Balance', min_value=-100000, max_value=100000, value=0)
+
+# Convert 'Yes'/'No' to 1/0 for the model
+has_cr_card = 1 if has_cr_card == 'Yes' else 0
+is_active_member = 1 if is_active_member == 'Yes' else 0
 
 # Create a DataFrame with the input data
 input_data = pd.DataFrame({
