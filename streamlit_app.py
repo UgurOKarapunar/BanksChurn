@@ -3,6 +3,8 @@ import pandas as pd
 import joblib
 
 # Load the trained model
+pipeline = joblib.load('C:/Users/ugrkr/OneDrive/Masaüstü/model_pipeline.pkl')
+
 import os
 model_path = 'C:/Users/ugrkr/OneDrive/Masaüstü/model_pipeline.pkl'
 if os.path.exists(model_path):
