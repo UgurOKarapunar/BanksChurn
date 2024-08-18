@@ -3,8 +3,12 @@ import pandas as pd
 import joblib
 
 # Load the trained model
-pipeline = joblib.load('model_pipeline.pkl')
-
+import os
+model_path = 'C:/Users/ugrkr/OneDrive/Masaüstü/model_pipeline.pkl'
+if os.path.exists(model_path):
+    pipeline = joblib.load(model_path)
+else:
+    print("Dosya bulunamadı:", model_path)
 # Function to make predictions
 def predict(input_data):
     prediction = pipeline.predict(input_data)
