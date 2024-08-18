@@ -1,0 +1,72 @@
+import joblib
+import pandas as pd
+from sklearn.metrics import f1_score, recall_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, RobustScaler
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.preprocessing import LabelEncoder
+
+# Load the data
+df = pd.read_csv(r"C:\Users\ugrkr\OneDrive\Masaüstü\train.csv")
+
+# Drop unnecessary columns
+df.drop(["Surname", "id", "CustomerId"], axis=1, inplace=True)
+
+# Separate target variable and features
+X = df.drop("Exited", axis=1)
+y = df["Exited"]
+
+# Identify categorical and numerical columns
+categorical_cols = X.select_dtypes(include=['object']).columns.tolist()
+numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
+
+# Define the preprocessing pipelines
+numeric_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler', RobustScaler())
+])
+
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+
+# Combine preprocessing steps
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numeric_transformer, numerical_cols),
+        ('cat', categorical_transformer, categorical_cols)
+    ])
+
+# Create the final pipeline with the model
+model_pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('classifier', GradientBoostingClassifier())
+])
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the model
+model_pipeline.fit(X_train, y_train)
+
+# Save the trained model pipeline
+joblib.dump(model_pipeline, 'model_pipeline.pkl')
+
+# Extract and save the fitted encoders and scalers
+fitted_numeric_transformer = model_pipeline.named_steps['preprocessor'].named_transformers_['num']
+fitted_categorical_transformer = model_pipeline.named_steps['preprocessor'].named_transformers_['cat']
+
+# Save the scalers and encoders separately
+joblib.dump(fitted_numeric_transformer.named_steps['scaler'], 'robust_scaler.pkl')
+joblib.dump(fitted_categorical_transformer.named_steps['onehot'], 'onehot_encoder.pkl')
+
+# Evaluate the model
+y_pred = model_pipeline.predict(X_test)
+print("F1 Score:", f1_score(y_test, y_pred))
+print("Recall Score:", recall_score(y_test, y_pred))
+
+print("Model and preprocessing components saved.")
